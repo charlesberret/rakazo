@@ -24,8 +24,11 @@ export function BotMemberPicker({
   const tokens = useMobileTokens();
   const [expanded, setExpanded] = useState(initiallyExpanded);
   const [query, setQuery] = useState("");
-  const needle = query.trim().toLowerCase();
-  const base = expanded ? bots : bots.filter((bot) => selected.includes(bot.id));
+  // Bots ever picked this session stay listed when collapsed so an unchecked
+  // member remains re-checkable until the form is saved.
+  const [everPicked, setEverPicked] = useState<ReadonlySet<string>>(() => new Set(selected));
+  const needle = expanded ? query.trim().toLowerCase() : "";
+  const base = expanded ? bots : bots.filter((bot) => everPicked.has(bot.id));
   const visible = needle
     ? base.filter(
         (bot) =>
@@ -83,6 +86,7 @@ export function BotMemberPicker({
                 disabled={disabled || (!checked && selected.length >= GROUP_MEMBER_MAX)}
                 onValueChange={(next) => {
                   if (next && selected.length >= GROUP_MEMBER_MAX) return;
+                  if (next) setEverPicked((current) => new Set(current).add(bot.id));
                   onChange(next ? [...selected, bot.id] : selected.filter((id) => id !== bot.id));
                 }}
                 thumbColor={checked ? tokens.primaryForeground : tokens.foreground}

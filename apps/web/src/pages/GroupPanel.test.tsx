@@ -264,7 +264,9 @@ describe("GroupSettings", () => {
   });
 
   const rowNames = () =>
-    [...container.querySelectorAll('[role="checkbox"]')].map((el) => el.parentElement?.textContent);
+    [...container.querySelectorAll('input[type="checkbox"]')].map(
+      (el) => el.parentElement?.textContent,
+    );
 
   it("shows only group members until Show all expands the roster", async () => {
     await render();
@@ -308,13 +310,13 @@ describe("GroupSettings", () => {
     expect(onOpenBot).toHaveBeenCalledWith("bot-1");
     await act(async () => {
       container
-        .querySelector<HTMLElement>('[role="checkbox"][aria-label^="Remove Researcher"]')!
+        .querySelector<HTMLElement>('input[type="checkbox"][aria-label^="Remove Researcher"]')!
         .click();
       await Promise.resolve();
     });
     expect(rowNames()).toEqual(["Researcher", "Writer"]);
     expect(
-      container.querySelector('[role="checkbox"][aria-label^="Add Researcher"]'),
+      container.querySelector('input[type="checkbox"][aria-label^="Add Researcher"]'),
     ).not.toBeNull();
   });
 });

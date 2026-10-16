@@ -3940,7 +3940,10 @@ export function ShellPage() {
                 bots={bots}
                 onCancel={() => setPanel(null)}
                 onCreate={(input) => createGroup(input)}
-                onOpenBot={openBot}
+                onOpenBot={(botId) => {
+                  setPanel(null);
+                  openBot(botId);
+                }}
               />
             ) : null}
             {panel === "group-settings" && activeGroup ? (
