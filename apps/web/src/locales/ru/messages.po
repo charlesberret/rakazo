@@ -2227,6 +2227,10 @@ msgstr ""
 msgid "Files"
 msgstr ""
 
+#: src/pages/GroupPanel.tsx
+msgid "Filter bots"
+msgstr ""
+
 #: src/pages/Artifacts.tsx
 msgid "Filter by date"
 msgstr ""
@@ -2751,13 +2755,10 @@ msgstr "Средний"
 msgid "Medium"
 msgstr ""
 
+#. placeholder {0}: selected.length
 #: src/pages/GroupPanel.tsx
-msgid "Members ({GROUP_MEMBER_MIN}–{GROUP_MEMBER_MAX})"
-msgstr "Участники ({GROUP_MEMBER_MIN} – {GROUP_MEMBER_MAX})"
-
-#: src/pages/GroupPanel.tsx
-msgid "Members (pick {GROUP_MEMBER_MIN}–{GROUP_MEMBER_MAX})"
-msgstr "Участники (выберите {GROUP_MEMBER_MIN}–{GROUP_MEMBER_MAX})"
+msgid "Members ({0})"
+msgstr ""
 
 #: src/pages/KnowledgeSection.tsx
 #: src/pages/MemorySettingsOverlay.tsx
@@ -3029,6 +3030,7 @@ msgstr "Активности бота пока нет."
 msgid "No bots"
 msgstr "Нет ботов"
 
+#: src/pages/GroupPanel.tsx
 #: src/pages/shell/bot-picker.tsx
 msgid "No bots match"
 msgstr "Ни один бот не подходит"
@@ -3068,6 +3070,10 @@ msgstr "Источники инструментов MCP или API пока не
 #: src/pages/McpServersOverlay.tsx
 msgid "No MCP servers yet."
 msgstr "Серверов MCP пока нет."
+
+#: src/pages/GroupPanel.tsx
+msgid "No members yet"
+msgstr ""
 
 #: src/pages/PeerMessagesOverlay.tsx
 msgid "No messages with {peerBotName} yet."
@@ -3362,6 +3368,10 @@ msgstr "Приостановлено"
 #: src/pages/shell/chat-context.tsx
 msgid "Photo"
 msgstr "Фото"
+
+#: src/pages/GroupPanel.tsx
+msgid "Pick {GROUP_MEMBER_MIN}–{GROUP_MEMBER_MAX}"
+msgstr ""
 
 #: src/lib/model-connection-preflight.ts
 msgid "Pick a model from the catalog."
@@ -4050,6 +4060,10 @@ msgstr "Общие навыки"
 msgid "Shell"
 msgstr "Оболочка"
 
+#: src/pages/GroupPanel.tsx
+msgid "Show all"
+msgstr ""
+
 #: src/pages/Shell.tsx
 msgid "Show bots"
 msgstr "Показать ботов"
@@ -4069,6 +4083,10 @@ msgstr "Показать ещё"
 #: src/pages/Auth.tsx
 msgid "Show password"
 msgstr "Показать пароль"
+
+#: src/pages/GroupPanel.tsx
+msgid "Show selected"
+msgstr ""
 
 #: src/pages/Shell.tsx
 msgid "Show settings"
