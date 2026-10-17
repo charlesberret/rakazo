@@ -99,7 +99,7 @@ export function BotMemberPicker({
         })}
         {visible.length === 0 ? (
           <Text style={{ color: tokens.mutedForeground, fontSize: 13, paddingVertical: 10 }}>
-            {expanded ? t("No bots match") : t("No members yet")}
+            {expanded ? t("No matching bots") : t("No members yet")}
           </Text>
         ) : null}
       </View>
