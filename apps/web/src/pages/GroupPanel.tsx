@@ -1,7 +1,7 @@
 import { Trans, useLingui } from "@lingui/react/macro";
 import type { Bot, Group } from "@rakazo/contracts";
 import { GROUP_MEMBER_MAX, GROUP_MEMBER_MIN } from "@rakazo/contracts";
-import { BotAvatar, Button, Input } from "@rakazo/ui-web";
+import { BotAvatar, Button, Checkbox, Input } from "@rakazo/ui-web";
 import { X } from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { errorText } from "../lib/user-error";
@@ -114,14 +114,12 @@ function MemberPicker({
                   {bot.name}
                 </span>
               </button>
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={checked}
                 aria-label={
                   checked ? t`Remove ${bot.name} from the group` : t`Add ${bot.name} to the group`
                 }
-                onChange={() => toggle(bot.id)}
-                className="h-5 w-5 shrink-0 accent-foreground"
+                onCheckedChange={() => toggle(bot.id)}
               />
             </div>
           );
