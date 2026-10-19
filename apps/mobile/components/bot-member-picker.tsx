@@ -1,10 +1,11 @@
 import { GROUP_MEMBER_MAX, GROUP_MEMBER_MIN } from "@rakazo/contracts";
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { StyleSheet, Text, TextInput, View } from "react-native";
 import type { MobileBot } from "../lib/api";
 import { useI18n } from "../lib/i18n";
 import { native, useMobileTokens } from "../lib/native";
 import { BotAvatar } from "./bot-avatar";
+import { NativeActionButton } from "./native-action-button";
 import { NativeSwitch } from "./native-switch";
 
 export function BotMemberPicker({
@@ -42,15 +43,11 @@ export function BotMemberPicker({
         <Text style={{ color: tokens.mutedForeground, fontSize: 14 }}>
           {t("Members ({count})", { count: selected.length })}
         </Text>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ expanded }}
+        <NativeActionButton
+          label={expanded ? t("Show selected") : t("Show all")}
+          prominence="quiet"
           onPress={() => setExpanded((value) => !value)}
-        >
-          <Text style={{ color: tokens.mutedForeground, fontSize: 13 }}>
-            {expanded ? t("Show selected") : t("Show all")}
-          </Text>
-        </Pressable>
+        />
       </View>
       {expanded ? (
         <>
@@ -66,10 +63,10 @@ export function BotMemberPicker({
               borderRadius: 11,
               padding: 10,
               color: tokens.foreground,
-              fontSize: 15,
+              fontSize: 16,
             }}
           />
-          <Text style={{ color: tokens.mutedForeground, fontSize: 12.5, marginTop: 8 }}>
+          <Text style={{ color: tokens.mutedForeground, fontSize: 14, marginTop: 8 }}>
             {t("Pick {min}–{max}", { min: GROUP_MEMBER_MIN, max: GROUP_MEMBER_MAX })}
           </Text>
         </>
@@ -98,7 +95,7 @@ export function BotMemberPicker({
           );
         })}
         {visible.length === 0 ? (
-          <Text style={{ color: tokens.mutedForeground, fontSize: 13, paddingVertical: 10 }}>
+          <Text style={{ color: tokens.mutedForeground, fontSize: 14, paddingVertical: 10 }}>
             {expanded ? t("No matching bots") : t("No members yet")}
           </Text>
         ) : null}

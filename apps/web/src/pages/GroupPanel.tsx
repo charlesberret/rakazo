@@ -1,5 +1,6 @@
 import { Trans, useLingui } from "@lingui/react/macro";
-import { type Bot, GROUP_MEMBER_MAX, GROUP_MEMBER_MIN, type Group } from "@rakazo/contracts";
+import type { Bot, Group } from "@rakazo/contracts";
+import { GROUP_MEMBER_MAX, GROUP_MEMBER_MIN } from "@rakazo/contracts";
 import { BotAvatar, Button, Input } from "@rakazo/ui-web";
 import { X } from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
@@ -72,7 +73,7 @@ function MemberPicker({
           aria-expanded={expanded}
           aria-controls={listId}
           onClick={() => setExpanded((value) => !value)}
-          className="text-[13px] text-muted-foreground hover:text-foreground"
+          className="text-sm text-muted-foreground hover:text-foreground"
         >
           {expanded ? <Trans>Show selected</Trans> : <Trans>Show all</Trans>}
         </button>
@@ -86,7 +87,7 @@ function MemberPicker({
             aria-label={t`Filter bots`}
             className="mt-2"
           />
-          <p className="mt-2 text-[12.5px] text-muted-foreground">
+          <p className="mt-2 text-sm text-muted-foreground">
             <Trans>
               Pick {GROUP_MEMBER_MIN}–{GROUP_MEMBER_MAX}
             </Trans>
@@ -126,7 +127,7 @@ function MemberPicker({
           );
         })}
         {visible.length === 0 ? (
-          <p className="px-2.5 py-2.5 text-[13px] text-muted-foreground">
+          <p className="px-2.5 py-2.5 text-sm text-muted-foreground">
             {expanded ? <Trans>No bots match</Trans> : <Trans>No members yet</Trans>}
           </p>
         ) : null}
@@ -169,7 +170,7 @@ export function CreateGroupForm({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="mb-4 flex items-center justify-between">
-        <span className="text-[13.5px] text-muted-foreground">
+        <span className="text-sm text-muted-foreground">
           <Trans>New group</Trans>
         </span>
         <Button
@@ -183,7 +184,7 @@ export function CreateGroupForm({
         </Button>
       </div>
       {error ? (
-        <p role="alert" className="mb-3 text-[13px] text-destructive">
+        <p role="alert" className="mb-3 text-sm text-destructive">
           {error}
         </p>
       ) : null}
@@ -292,7 +293,7 @@ export function GroupSettings({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="mb-4 flex items-center justify-between">
-        <span className="text-[13.5px] text-muted-foreground">
+        <span className="text-sm text-muted-foreground">
           <Trans>Group settings</Trans>
         </span>
         <Button
@@ -306,7 +307,7 @@ export function GroupSettings({
         </Button>
       </div>
       {error ? (
-        <p role="alert" className="mb-3 text-[13px] text-destructive">
+        <p role="alert" className="mb-3 text-sm text-destructive">
           {error}
         </p>
       ) : null}

@@ -284,7 +284,7 @@ describe("GroupSettings", () => {
     expect(filter).not.toBeNull();
     await act(async () => {
       const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;
-      setter.call(filter, "writ");
+      setter.call(filter, "  PROSE ");
       filter!.dispatchEvent(new Event("input", { bubbles: true }));
       await Promise.resolve();
     });
@@ -296,6 +296,9 @@ describe("GroupSettings", () => {
       await Promise.resolve();
     });
     expect(container.textContent).toContain("No bots match");
+    await click("Show selected");
+    expect(rowNames()).toEqual(["Researcher", "Writer"]);
+    expect(container.querySelector('input[aria-label="Filter bots"]')).toBeNull();
   });
 
   it("opens the bot profile from the name and keeps unchecked members listed", async () => {
