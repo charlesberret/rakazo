@@ -428,6 +428,16 @@ describe("bounded context selection", () => {
       expect(shortenToolResultText(source, 1024, {}, { afterUse: true })).toBe(after);
     }
   });
+  it("shrinks medium-length fields when shortening after use", () => {
+    const source = JSON.stringify({
+      id: "doc-1",
+      fields: Array.from({ length: 7 }, (_, index) => `${index} ${"evidence ".repeat(20)}`),
+    });
+    const out = shortenToolResultText(source, 1024, {}, { afterUse: true });
+    expect(out.length).toBeLessThan(source.length);
+    expect(out).toContain("Earlier result shortened after you read it");
+    expect(JSON.parse(out).id).toBe("doc-1");
+  });
   it("keeps ids in a JSON text part when the MCP envelope also has other content", () => {
     const names = ["Ada", "Ben", "Cleo"];
     const inner = JSON.stringify({

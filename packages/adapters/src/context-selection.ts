@@ -237,7 +237,8 @@ function shortenStructuredResult(
     }, undefined);
     if (!largest) break; // Required metadata alone may still need explicit budget failure.
     const value = (largest.parent as Record<string, unknown>)[largest.key] as string;
-    const keep = Math.max(8, Math.floor(value.length / 4));
+    // Leave room for the marker so medium-length fields still shrink.
+    const keep = Math.max(8, Math.floor((value.length - marker.length) / 4));
     const shortened = `${value.slice(0, keep)}\n${marker}\n${value.slice(-keep)}`;
     if (shortened.length >= value.length) break;
     (largest.parent as Record<string, unknown>)[largest.key] = shortened;
