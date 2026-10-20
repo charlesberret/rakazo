@@ -102,10 +102,17 @@ export function isRetryableProviderUnavailable(error: unknown): boolean {
  * structured status fields.
  */
 export function isTransientModelError(error: unknown): boolean {
+  const { text } = errorFacts(error);
+  // Short rate windows can reset during a retry; subscription and billing limits cannot.
+  const shortWindow =
+    /\bper[- ](?:second|minute)\b|\b(?:rpm|tpm)\b|retry[- ]after[: ]+\d+(?:\.\d+)?\s*(?:seconds?|secs?|s)\b/.test(
+      text,
+    );
   return (
     isRetryableProviderUnavailable(error) &&
-    !/insufficient_quota|exceeded your current quota|quota exhausted|usage limit|billing|credit balance|insufficient (?:funds|balance|credits)|payment|out of budget/.test(
-      errorFacts(error).text,
-    )
+    !/insufficient_quota|exceeded your current quota|quota exhausted|(?:chatgpt|5-hour|weekly(?: \(7-day\))?|monthly) usage limit|billing|credit balance|insufficient (?:funds|balance|credits)|payment|out of budget/.test(
+      text,
+    ) &&
+    !(text.includes("usage limit") && !shortWindow)
   );
 }
