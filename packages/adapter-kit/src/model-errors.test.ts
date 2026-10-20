@@ -188,6 +188,17 @@ describe("provider availability classification", () => {
       { status: 403, type: "permission_error", message: "permission denied" },
       false,
     ],
+    [
+      "ChatGPT usage limit",
+      new Error("You have hit your ChatGPT usage limit (plus plan). Try again in ~158 min."),
+      true,
+    ],
+    ["ChatGPT usage limit without a plan", "You have hit your ChatGPT usage limit.", true],
+    [
+      "HTTP 401 with ChatGPT usage limit text",
+      { status: 401, message: "You have hit your ChatGPT usage limit." },
+      false,
+    ],
     ["quota exhaustion", { status: 402, message: "provider quota exhausted" }, true],
     ["plain status", new Error("503 provider unavailable"), true],
     ["HTTP server status", new Error("HTTP 500"), true],

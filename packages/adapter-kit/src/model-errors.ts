@@ -59,6 +59,8 @@ export function isRetryableProviderUnavailable(error: unknown): boolean {
   ) {
     return true;
   }
+  // The ChatGPT subscription (Codex) runtime reports an exhausted usage window without a status.
+  if (/you have hit your chatgpt usage limit/.test(text)) return true;
   if (
     [400, 401, 403].some((status) => statuses.has(status)) ||
     /\b(?:http(?:\s+status(?:\s+code)?)?|status(?:\s+code)?|error\s+code)\s*[:=]?\s*(?:400|401|403)\b/.test(

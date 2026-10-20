@@ -733,6 +733,38 @@ describe("Pi runtime ordered model fallback", () => {
     expect(providerState.stream).toHaveBeenCalledTimes(2);
   });
 
+  it("completes on the backup when the primary reports a ChatGPT usage limit", async () => {
+    const chatGptUsageLimit =
+      "You have hit your ChatGPT usage limit (plus plan). Try again in ~158 min.";
+    providerState.stream.mockImplementation((target: Model<"openai-completions">) =>
+      target.provider === primary.provider
+        ? stream(target, message(target, [], "error", chatGptUsageLimit))
+        : stream(target, message(target, [{ type: "text", text: "backup answer" }], "stop")),
+    );
+    const events = await run(
+      request([{ provider: backupA.provider, id: backupA.id, apiKey: "backup-key" }]),
+    );
+    expect(events.at(-1)).toEqual({ type: "done", text: "backup answer" });
+    expect(providerState.stream).toHaveBeenCalledTimes(2);
+    expect(providerState.delay).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    "You have hit your ChatGPT usage limit (plus plan). Try again in ~158 min.",
+    '403 {"error":{"type":"permission_error","message":"You\'ve reached your 5-hour usage limit."}}',
+    "402 provider quota exhausted",
+  ])(
+    "does not retry the same model on an exhausted usage window without a backup: %s",
+    async (error) => {
+      providerState.stream.mockImplementation(() =>
+        stream(primary, message(primary, [], "error", error)),
+      );
+      await expect(run(request())).rejects.toThrow(error);
+      expect(providerState.stream).toHaveBeenCalledOnce();
+      expect(providerState.delay).not.toHaveBeenCalled();
+    },
+  );
+
   it("switches after a Codex idle timeout before output", async () => {
     vi.useFakeTimers();
     try {
