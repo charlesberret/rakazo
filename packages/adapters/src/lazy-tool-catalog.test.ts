@@ -318,6 +318,14 @@ describe("lazy tool catalog", () => {
       group: "gmail",
       names: ["lower_0", "lower_1"],
     });
+    expect(searchCatalog(entries, { query: "Gmail" })).toEqual({
+      group: "Gmail",
+      names: ["Upper_0", "Upper_1"],
+    });
+    expect(searchCatalog(entries, { query: "gmail" })).toEqual({
+      group: "gmail",
+      names: ["lower_0", "lower_1"],
+    });
     const listed = searchCatalog(entries, {});
     expect("index" in listed && listed.index).toEqual(
       [

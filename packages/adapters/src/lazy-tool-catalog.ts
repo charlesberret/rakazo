@@ -154,18 +154,19 @@ export function searchCatalog(
   entries: CatalogEntry[],
   args: Record<string, unknown>,
 ): CatalogSearchResult {
-  let query = String(args.query ?? "")
+  // Source labels can differ only by case, so pick a source from the query as typed.
+  const typedQuery = String(args.query ?? "")
     .slice(0, MAX_QUERY_LENGTH)
-    .trim()
-    .toLowerCase();
+    .trim();
+  let query = typedQuery.toLowerCase();
   let groupFilter = String(args.group ?? "")
     .slice(0, MAX_GROUP_LENGTH)
     .trim();
   // A query that is only a source name asks for that source's tools, which word search
   // would cap before the names that sort late.
   if (!groupFilter && query && !entries.some((entry) => isExactName(entry, query))) {
-    if (entriesInGroup(entries, query).length > 0) {
-      groupFilter = query;
+    if (entriesInGroup(entries, typedQuery).length > 0) {
+      groupFilter = typedQuery;
       query = "";
     }
   }
