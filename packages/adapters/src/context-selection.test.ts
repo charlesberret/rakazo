@@ -406,6 +406,28 @@ describe("bounded context selection", () => {
     const out = shortenToolResultText(source, 512);
     expect(out.length).toBeLessThan(source.length);
   });
+  it("marks results shortened after use as read, not unavailable", () => {
+    const sources = [
+      "file line ".repeat(1500),
+      JSON.stringify({ id: "doc-1", body: "config value ".repeat(1000) }),
+      JSON.stringify({
+        content: [
+          { type: "text", text: JSON.stringify({ id: "doc-1", body: "row ".repeat(2000) }) },
+        ],
+      }),
+    ];
+    for (const source of sources) {
+      const before = shortenToolResultText(source, 1024);
+      expect(before).toMatch(/omitted evidence is unavailable|inspect original evidence/);
+      const after = shortenToolResultText(source, 1024, {}, { afterUse: true });
+      expect(after).toContain("Earlier result shortened after you read it");
+      expect(after).toContain("statements made from it stand");
+      expect(after).not.toContain("unavailable");
+      expect(after).not.toContain("inspect original evidence");
+      expect(after.length).toBeLessThan(source.length / 4);
+      expect(shortenToolResultText(source, 1024, {}, { afterUse: true })).toBe(after);
+    }
+  });
   it("keeps ids in a JSON text part when the MCP envelope also has other content", () => {
     const names = ["Ada", "Ben", "Cleo"];
     const inner = JSON.stringify({

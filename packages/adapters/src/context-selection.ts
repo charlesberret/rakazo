@@ -183,8 +183,23 @@ function shortenHistoryResult(
   }
   return encoded;
 }
+/**
+ * A result cut before the model read it is missing evidence. A result cut after the model read
+ * it is not: saying "unavailable" there makes a model retract statements it made from it.
+ */
+const OMITTED_BEFORE_USE =
+  "[Tool result truncated to fit context; omitted evidence is unavailable.]";
+const OMITTED_TEXT_BEFORE_USE =
+  "[Tool result truncated to fit context; inspect original evidence before claiming omitted details.]";
+const OMITTED_AFTER_USE =
+  "[Earlier result shortened after you read it; statements made from it stand. Re-run the tool only if you need the omitted text.]";
+
 /** Keep control fields and JSON shape while marking omitted long evidence strings. */
-function shortenStructuredResult(source: string, size: number): string | undefined {
+function shortenStructuredResult(
+  source: string,
+  size: number,
+  marker = OMITTED_BEFORE_USE,
+): string | undefined {
   let payload: unknown;
   try {
     payload = JSON.parse(source);
@@ -223,7 +238,7 @@ function shortenStructuredResult(source: string, size: number): string | undefin
     if (!largest) break; // Required metadata alone may still need explicit budget failure.
     const value = (largest.parent as Record<string, unknown>)[largest.key] as string;
     const keep = Math.max(8, Math.floor(value.length / 4));
-    const shortened = `${value.slice(0, keep)}\n[Tool result truncated to fit context; omitted evidence is unavailable.]\n${value.slice(-keep)}`;
+    const shortened = `${value.slice(0, keep)}\n${marker}\n${value.slice(-keep)}`;
     if (shortened.length >= value.length) break;
     (largest.parent as Record<string, unknown>)[largest.key] = shortened;
     encoded = JSON.stringify(holder.payload);
@@ -252,7 +267,7 @@ function isJsonTextPart(part: { type?: string; text?: unknown } | undefined): pa
   }
 }
 
-function shortenMcpEnvelope(source: string, size: number): string | undefined {
+function shortenMcpEnvelope(source: string, size: number, marker: string): string | undefined {
   let payload: { content?: Array<{ type?: string; text?: unknown }> } & Record<string, unknown>;
   try {
     payload = JSON.parse(source);
@@ -272,7 +287,11 @@ function shortenMcpEnvelope(source: string, size: number): string | undefined {
   delete outer.structuredContent;
   let outerSource = JSON.stringify(outer);
   if (outerSource.length > Math.max(64, Math.floor(size / 4))) {
-    const shortenedOuter = shortenStructuredResult(outerSource, Math.max(64, Math.floor(size / 4)));
+    const shortenedOuter = shortenStructuredResult(
+      outerSource,
+      Math.max(64, Math.floor(size / 4)),
+      marker,
+    );
     if (shortenedOuter !== undefined) {
       Object.assign(payload, JSON.parse(shortenedOuter));
       if (shortenedOuter !== outerSource) payload.contextTruncated = true;
@@ -291,7 +310,7 @@ function shortenMcpEnvelope(source: string, size: number): string | undefined {
     let changed = false;
     parts = parts.map((part) => {
       if (isJsonTextPart(part)) {
-        const shortened = shortenStructuredResult(part.text, budget);
+        const shortened = shortenStructuredResult(part.text, budget, marker);
         if (shortened === undefined || shortened === part.text) return part;
         changed = true;
         return { ...part, text: shortened };
@@ -301,6 +320,7 @@ function shortenMcpEnvelope(source: string, size: number): string | undefined {
       const shortened = shortenStructuredResult(
         serialized,
         Math.min(budget, Math.max(128, Math.floor(size / 4))),
+        marker,
       );
       if (shortened === undefined || shortened === serialized) return part;
       try {
@@ -313,7 +333,7 @@ function shortenMcpEnvelope(source: string, size: number): string | undefined {
       }
     });
     if (structuredSource !== undefined) {
-      const shortenedStructured = shortenStructuredResult(structuredSource, budget);
+      const shortenedStructured = shortenStructuredResult(structuredSource, budget, marker);
       try {
         payload.structuredContent = JSON.parse(shortenedStructured ?? "");
         if (shortenedStructured !== structuredSource) changed = true;
@@ -333,17 +353,22 @@ function shortenMcpEnvelope(source: string, size: number): string | undefined {
   return encoded;
 }
 
-/** Shorten evidence cheaply while keeping structured controls and original-history offsets. */
+/**
+ * Shorten evidence cheaply while keeping structured controls and original-history offsets.
+ * Pass afterUse when the model already read the result on an earlier step.
+ */
 export function shortenToolResultText(
   source: string,
   size: number,
   tool: { name?: string; arguments?: unknown } = {},
+  options: { afterUse?: boolean } = {},
 ): string {
+  const marker = options.afterUse ? OMITTED_AFTER_USE : OMITTED_BEFORE_USE;
   return (
     shortenHistoryResult(source, size, tool) ??
-    shortenMcpEnvelope(source, size) ??
-    shortenStructuredResult(source, size) ??
-    `${source.slice(0, Math.floor(size / 2))}\n[Tool result truncated to fit context; inspect original evidence before claiming omitted details.]\n${source.slice(-Math.floor(size / 2))}`
+    shortenMcpEnvelope(source, size, marker) ??
+    shortenStructuredResult(source, size, marker) ??
+    `${source.slice(0, Math.floor(size / 2))}\n${options.afterUse ? OMITTED_AFTER_USE : OMITTED_TEXT_BEFORE_USE}\n${source.slice(-Math.floor(size / 2))}`
   );
 }
 interface Group {
