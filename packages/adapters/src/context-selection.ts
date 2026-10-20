@@ -238,7 +238,9 @@ function shortenStructuredResult(
     if (!largest) break; // Required metadata alone may still need explicit budget failure.
     const value = (largest.parent as Record<string, unknown>)[largest.key] as string;
     // Leave room for the marker so medium-length fields still shrink.
-    const keep = Math.max(8, Math.floor((value.length - marker.length) / 4));
+    const preferredKeep = Math.max(8, Math.floor(value.length / 4));
+    const keep = Math.min(preferredKeep, Math.floor((value.length - marker.length - 3) / 2));
+    if (keep < 1) break;
     const shortened = `${value.slice(0, keep)}\n${marker}\n${value.slice(-keep)}`;
     if (shortened.length >= value.length) break;
     (largest.parent as Record<string, unknown>)[largest.key] = shortened;
@@ -364,12 +366,13 @@ export function shortenToolResultText(
   tool: { name?: string; arguments?: unknown } = {},
   options: { afterUse?: boolean } = {},
 ): string {
-  const marker = options.afterUse ? OMITTED_AFTER_USE : OMITTED_BEFORE_USE;
+  const afterUse = options.afterUse || source.includes(OMITTED_AFTER_USE);
+  const marker = afterUse ? OMITTED_AFTER_USE : OMITTED_BEFORE_USE;
   return (
     shortenHistoryResult(source, size, tool) ??
     shortenMcpEnvelope(source, size, marker) ??
     shortenStructuredResult(source, size, marker) ??
-    `${source.slice(0, Math.floor(size / 2))}\n${options.afterUse ? OMITTED_AFTER_USE : OMITTED_TEXT_BEFORE_USE}\n${source.slice(-Math.floor(size / 2))}`
+    `${source.slice(0, Math.floor(size / 2))}\n${afterUse ? OMITTED_AFTER_USE : OMITTED_TEXT_BEFORE_USE}\n${source.slice(-Math.floor(size / 2))}`
   );
 }
 interface Group {
@@ -455,6 +458,12 @@ export function selectContext<T extends ContextMessage>(
   const fixed = fixedTokens(options.budget);
   const available = Math.floor(options.budget.contextWindow - options.budget.outputReserve - fixed);
   const groups = messageGroups(messages, options.budget.imageTokens);
+  const latestToolCall = messages.findLastIndex(
+    (message) =>
+      message.role === "assistant" &&
+      Array.isArray(message.content) &&
+      message.content.some((part) => part?.type === "toolCall"),
+  );
   const protectedIndexes = new Set(options.protectedIndexes ?? []);
   for (const [index, message] of messages.entries()) {
     if (message.role === "system") protectedIndexes.add(index);
@@ -512,6 +521,7 @@ export function selectContext<T extends ContextMessage>(
           serialized,
           size,
           nativeCall ?? { name: message.toolName },
+          { afterUse: index < latestToolCall },
         );
         if (text.length >= serialized.length) return message;
         shortenedCount += 1;
