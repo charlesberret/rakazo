@@ -189,6 +189,28 @@ describe("bounded context selection", () => {
       expect(unread).not.toContain("Earlier result shortened");
     }
   });
+  it("marks a protected result as read when an assistant reply follows it", () => {
+    const selected = selectContext(
+      [
+        user("objective"),
+        {
+          role: "assistant",
+          content: [{ type: "toolCall", id: "read", name: "read", arguments: {} }],
+        },
+        {
+          role: "toolResult",
+          toolCallId: "read",
+          content: JSON.stringify({ body: "r".repeat(5000) }),
+        },
+        { role: "assistant", content: [{ type: "text", text: "Summary of the file." }] },
+        user("next"),
+      ],
+      { budget, strategy: "retrieval", protectedIndexes: [1] },
+    );
+    const read = JSON.stringify(selected.messages[2]!.content);
+    expect(read).toContain("Earlier result shortened after you read it");
+    expect(read).not.toContain("unavailable");
+  });
   it("shortens history JSON evidence while preserving exact original offsets and pagination", () => {
     const original = 'Quoted "value" and newline\n'.repeat(500);
     const payload = {
